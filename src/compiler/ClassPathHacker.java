@@ -5,11 +5,13 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 
 public class ClassPathHacker
 {
 
-    private static final Class[] parameters = new Class[] { URL.class };
+    @SuppressWarnings("rawtypes")
+	private static final Class[] parameters = new Class[] { URL.class };
 
     public static void addFile(String s) throws IOException
     {
@@ -21,8 +23,16 @@ public class ClassPathHacker
     {
         addURL(f.toURI().toURL());
     }
+    
+    public static void addFiles(ArrayList<File> files) throws IOException
+    {
+    	for(File f : files) {
+    		addURL(f.toURI().toURL());
+    	}
+    }
 
-    public static void addURL(URL u) throws IOException
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	public static void addURL(URL u) throws IOException
     {
 
         URLClassLoader sysloader = (URLClassLoader) ClassLoader
