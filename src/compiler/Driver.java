@@ -43,7 +43,7 @@ public class Driver
     private static String packageName;
     private static String jdkPath;
     private static String mainClass;
-    private static Object[] commandLineArgs;
+    private static String[] commandLineArgs;
     
     private static ArrayList<File> libraries;
     private static ArrayList<File> extraSourceFiles;
@@ -170,7 +170,7 @@ public class Driver
     					commandLineArgs = lineComponents[1].split(" ");
     				}
     				else {
-    					commandLineArgs = new Object[0];
+    					commandLineArgs = new String[0];
     				}
     				break;
     			default:
@@ -486,8 +486,7 @@ public class Driver
             {
                 URLClassLoader loader = null;
                 try
-                {
-                	
+                {	
                     loader = new URLClassLoader(
                             new URL[] { extractedSubmission.toURI().toURL() },
                             ClassLoader.getSystemClassLoader());
@@ -495,7 +494,7 @@ public class Driver
                             .getDeclaredMethod("main",
                                     new Class[] { String[].class })
                             .invoke(null, new Object[]
-                    { commandLineArgs });
+                    { (Object[]) commandLineArgs });
                     loader.close();
                 }
                 catch (Exception e)
