@@ -1,12 +1,12 @@
 package compiler;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -16,13 +16,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
-//import javax.tools.JavaCompiler;
-//import javax.tools.ToolProvider;
-
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Scanner;
-//import java.util.Scanner;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -38,6 +34,8 @@ public class Driver
 {
 
 	private static final String CONFIG_FILE_NAME = "config.txt";
+	private static final String NEWLINE = System.getProperty("line.separator");
+	
     private static UnzipUtility unzipUtility;
     private static String root;
 
@@ -54,7 +52,7 @@ public class Driver
 
     public static void main(String[] args) throws IOException
     {
-    	System.out.println("CS 2114 Batch Compiler\n");
+    	System.out.println("CS 2114 Batch Compiler" + NEWLINE);
     	
         if (args.length == 0)
         {
@@ -66,12 +64,12 @@ public class Driver
         }
         else if(args[0].equals("compile"))
         {
-        	System.out.println("PREPARING TO COMPILE " + args[1] + "\n");
+        	System.out.println("PREPARING TO COMPILE " + args[1] + NEWLINE);
         	
         	System.out.println("Reading properties from config file...");
         	readConfigFile();
         	
-        	System.out.println("\nGrabbing files...");
+        	System.out.println(NEWLINE + "Grabbing files...");
         	
         	libraries = readFilesFromDir("lib");
         	ClassPathHacker.addFiles(libraries);
@@ -80,7 +78,7 @@ public class Driver
         	extraSourceFiles = readFilesFromDir("src");
         	System.out.println("Found extra source files: " + extraSourceFiles.toString());
         	
-        	System.out.println("\nPress enter to compile using these settings");
+        	System.out.println(NEWLINE + "Press enter to compile using these settings");
         	System.in.read();
         	
         	System.out.println("EXTRACTING FILES FROM " + args[1]);
@@ -97,19 +95,25 @@ public class Driver
                 System.out.println("Could not access a class path file");
             }
             
-            System.out.println("Batch compilation complete!\n");
+            System.out.println("Batch compilation complete!" + NEWLINE);
             System.out.println("The following errors were reported during compilation."
-            		+ " You should investigate the sources of these errors manually.\n");
+            		+ " You should investigate the sources of these errors manually."
+            		+ " The error report has been saved in the batch folder" + NEWLINE);
             System.out.println(compilationErrorReport);
             System.out.println("All other submissions successfully compiled, "
             		+ "use the run command to inspect individual submissions");
+            
+            FileWriter fileWriter = new FileWriter(root + File.separator + "errorReport.txt");
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+            bufferedWriter.write(compilationErrorReport);
+            bufferedWriter.close();
         }
         else if(args[0].equals("run"))
         {
         	System.out.println("Reading properties from config file...");
         	readConfigFile();
         	
-        	System.out.println("\nGrabbing files...");
+        	System.out.println(NEWLINE + "Grabbing files...");
         	
         	libraries = readFilesFromDir("lib");
         	ClassPathHacker.addFiles(libraries);
@@ -122,6 +126,9 @@ public class Driver
         			"src";
         	
         	runProgram(new File(srcPath));
+        }
+        else {
+        	System.out.println("Please specify compile or run");
         }
     }
     
@@ -161,6 +168,9 @@ public class Driver
     			case "args":
     				if(lineComponents.length > 1) {
     					commandLineArgs = lineComponents[1].split(" ");
+    				}
+    				else {
+    					commandLineArgs = new Object[0];
     				}
     				break;
     			default:
@@ -303,7 +313,7 @@ public class Driver
 
         if (extractedSubmissionPath == null)
         {
-        	compilationErrorReport += "[" + pid + "] Error extracting jar file\n";
+        	compilationErrorReport += "[" + pid + "] Error extracting jar file" + NEWLINE;
         }
         else
         {
@@ -334,7 +344,7 @@ public class Driver
             catch (Exception e)
             {
                 e.printStackTrace();
-                compilationErrorReport += "[" + pid + "] Error copying extra source files\n";
+                compilationErrorReport += "[" + pid + "] Error copying extra source files" + NEWLINE;
             }
             
             compile(extractedSubmission, pid);
@@ -452,11 +462,11 @@ public class Driver
         if (!success)
         {
             compilationErrorReport += "[" + pid
-            		+ "] Compilation error, compiler returned this diagnostic message:\n";
+            		+ "] Compilation error, compiler returned this diagnostic message:" + NEWLINE;
             for (Diagnostic<? extends JavaFileObject> d : diagnostics
                     .getDiagnostics())
             {
-                compilationErrorReport += d.toString() + "\n";
+                compilationErrorReport += d.toString() + NEWLINE;
             }
             return false;
         }
@@ -488,42 +498,7 @@ public class Driver
                     { commandLineArgs });
                     loader.close();
                 }
-                catch (MalformedURLException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                catch (IllegalAccessException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                catch (IllegalArgumentException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                catch (InvocationTargetException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                catch (NoSuchMethodException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                catch (SecurityException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                catch (ClassNotFoundException e)
-                {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                catch (IOException e)
+                catch (Exception e)
                 {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
